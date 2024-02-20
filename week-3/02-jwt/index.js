@@ -1,41 +1,49 @@
 const jwt = require('jsonwebtoken');
 const jwtPassword = 'secret';
+const zod =  require("zod");
+
+const emailSchema =  zod.string().email();
+const passwordSchema = zod.string().min(6);
+
 
 function signJwt(username, password) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(username)) {
+    const usernameResponse = emailSchema.safeParse(username);
+    const  passwordResponse = passwordSchema.safeParse(password);
+    if(!usernameResponse.success || !passwordResponse.success){
         return null;
     }
 
-    if (password.length < 6) {
-        return null;
-    }
+    const signature = jwt.sign({
+        user: username
+    }, jwtPassword);
 
-    const token = jwt.sign({ username, password }, jwtPassword);
-    return token;
+    return signature;
 }
+
 
 function verifyJwt(token) {
     try {
-        jwt.verify(token, jwtPassword);
+      jwt.verify(token, jwtPassword);
+    } catch (e) {
+      ans = false;
+    }
+    return ans;
+  }
+
+  
+function decodeJwt(token) {
+    const decoded = jwt.decode(token);
+    if(decoded){
         return true;
-    } catch (error) {
+    } else {
         return false;
     }
 }
 
-function decodeJwt(token) {
-    try {
-        const decoded = jwt.decode(token);
-        return decoded;
-    } catch (error) {
-        return false;
-    }
-}
 
 module.exports = {
-    signJwt,
-    verifyJwt,
-    decodeJwt,
-    jwtPassword,
+  signJwt,
+  verifyJwt,
+  decodeJwt,
+  jwtPassword,
 };
