@@ -1,10 +1,29 @@
 const { Router } = require("express");
 const adminMiddleware = require("../middleware/admin");
+const { Admin } = require("../db");
 const router = Router();
 
 // Admin Routes
 router.post('/signup', (req, res) => {
-    // Implement admin signup logic
+    const username = req.body.username;
+    const password = req.body.password;
+
+    Admin.create({
+        username: username,
+        password: password
+    })
+    .then(function(){
+        req.json({
+            message: "Admin created successfully"
+        })
+    })
+    .catch(function(){
+        res.json({
+            message:  'Error creating admin'
+        })
+    })
+    
+    
 });
 
 router.post('/courses', adminMiddleware, (req, res) => {
